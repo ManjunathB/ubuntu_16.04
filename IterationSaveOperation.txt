@@ -1,0 +1,165 @@
+package com.jlr.rmdv.latetestvalidator;
+
+import com.ibm.team.foundation.common.text.XMLString;
+import com.ibm.team.process.common.IIteration;
+import com.ibm.team.process.common.IProcessConfigurationElement;
+import com.ibm.team.process.common.IProcessItem;
+import com.ibm.team.process.common.advice.AdvisableOperation;
+import com.ibm.team.process.common.advice.IReportInfo;
+import com.ibm.team.process.common.advice.runtime.IOperationParticipant;
+import com.ibm.team.process.common.advice.runtime.IParticipantInfoCollector;
+import com.ibm.team.process.internal.common.query.BaseIterationQueryModel.IterationQueryModel;
+import com.ibm.team.process.internal.common.query.BaseProjectAreaQueryModel.ProjectAreaQueryModel;
+import com.ibm.team.process.internal.service.ProjectAreaSaveOperation;
+import com.ibm.team.repository.common.IAuditableHandle;
+import com.ibm.team.repository.common.TeamRepositoryException;
+import com.ibm.team.repository.common.query.IItemQuery;
+import com.ibm.team.repository.common.query.IItemQueryPage;
+import com.ibm.team.repository.common.query.IQuery.Factory;
+import com.ibm.team.repository.common.query.ast.IPredicate;
+import com.ibm.team.repository.common.query.ast.IStringField;
+import com.ibm.team.repository.common.service.IQueryService;
+import com.ibm.team.repository.service.AbstractService;
+import com.ibm.team.repository.service.IRepositoryItemService;
+import com.ibm.team.workitem.common.internal.model.query.BaseWorkItemQueryModel.WorkItemQueryModel;
+import com.ibm.team.workitem.common.model.IAttribute;
+import com.ibm.team.workitem.common.model.IWorkItem;
+import com.ibm.team.workitem.common.model.IWorkItemHandle;
+import com.ibm.team.workitem.service.IWorkItemServer;
+import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import org.eclipse.core.runtime.IProgressMonitor;
+
+public class IterationSaveOperationParticipant
+  extends AbstractService
+  implements IOperationParticipant
+{
+  private static String errMessage1 = "There was an error saving the Iteration";
+  
+  public void run(AdvisableOperation operation, IProcessConfigurationElement participantConfig, IParticipantInfoCollector collector, IProgressMonitor monitor)
+    throws TeamRepositoryException
+  {
+    if ((operation instanceof ProjectAreaSaveOperation))
+    {
+      ProjectAreaSaveOperation operationData = (ProjectAreaSaveOperation)operation;
+      
+      List<IProcessItem> savedItems = Arrays.asList(operationData.getSavedItems());
+      String strReportMessage = "";
+      for (IProcessItem savedItem : savedItems) {
+        if (savedItem.getProcessItemType() == 6)
+        {
+          IRepositoryItemService itemService = (IRepositoryItemService)getService(IRepositoryItemService.class);
+          
+          IIteration newIteration = (IIteration)savedItem;
+          newIteration.getChildren();
+          
+          Date newEndDate = newIteration.getEndDate();
+          
+          IAuditableHandle oldHandle = newIteration.getPredecessorState();
+          if (oldHandle != null)
+          {
+            IIteration oldIteration = (IIteration)itemService.fetchState(oldHandle, IRepositoryItemService.COMPLETE);
+            Date oldEndDate = oldIteration.getEndDate();
+            
+            boolean endDateChanged = false;
+            if (newEndDate != null) {
+              endDateChanged = !newEndDate.equals(oldEndDate);
+            } else if (oldEndDate != null) {
+              endDateChanged = !oldEndDate.equals(newEndDate);
+            }
+            if (endDateChanged)
+            {
+              BaseWorkItemQueryModel.WorkItemQueryModel model = BaseWorkItemQueryModel.WorkItemQueryModel.ROOT;
+              IItemQuery query = (IItemQuery)IItemQuery.FACTORY.newInstance(model);
+              IPredicate projectAreaPredicate = model.projectArea()._eq(operation.getProcessArea());
+              IPredicate iterationPredicate = model.target()._eq(newIteration);
+              IPredicate workItemTypePredicate = model.workItemType()._eq(Configuration.WORKITEM_TYPE_ID);
+              
+              query.filter(projectAreaPredicate._and(iterationPredicate)._and(workItemTypePredicate));
+              
+              IQueryService queryService = (IQueryService)getService(IQueryService.class);
+              IItemQueryPage itemQueryPage = queryService.queryItems(query, IQueryService.EMPTY_PARAMETERS, 512);
+              
+              List<IWorkItemHandle> workItemHandleList = itemQueryPage.getItemHandles();
+              while (itemQueryPage.hasNext())
+              {
+                itemQueryPage = (IItemQueryPage)queryService.fetchPage(itemQueryPage.getToken(), itemQueryPage.getNextStartPosition(), itemQueryPage.getSize());
+                workItemHandleList.addAll(itemQueryPage.getItemHandles());
+              }
+              IWorkItemServer workItemServer = (IWorkItemServer)getService(IWorkItemServer.class);
+              int iCountWorkItemsVisited = 0;
+              int iCountWorkItemsLateBefore = 0;
+              int iCountWorkItemsLateAfter = 0;
+              Validator validator = new Validator();
+              for (IWorkItemHandle workItemHandle : workItemHandleList)
+              {
+                IWorkItem workItem = (IWorkItem)itemService.fetchItem(workItemHandle, IRepositoryItemService.COMPLETE);
+                if (!validator.passPreChecks(workItem, workItemServer, monitor).booleanValue())
+                {
+                  IReportInfo info = collector.createInfo(errMessage1, validator.collectorText);
+                  info.setSeverity(4);
+                  collector.addInfo(info);
+                  return;
+                }
+                if (!validator.workItemPassValidation(workItem, newIteration, workItemServer, monitor).booleanValue())
+                {
+                  String strError = "At least one of the Test Tasks assigned to this iteration would become Late and has no MiNT ID.Work Item ID: " + 
+                    workItem.getId() + ". Summary='" + workItem.getHTMLSummary().getPlainText().trim() + "'";
+                  IReportInfo info = collector.createInfo(strError, strError);
+                  info.setSeverity(4);
+                  collector.addInfo(info);
+                  return;
+                }
+                IAttribute lateAttribute = workItemServer.findAttribute(workItem.getProjectArea(), Configuration.IS_LATE_ID, monitor);
+                if (((Boolean)workItem.getValue(lateAttribute)).booleanValue()) {
+                  iCountWorkItemsLateBefore++;
+                }
+                iCountWorkItemsVisited++;
+              }
+              for (IWorkItemHandle workItemHandle : workItemHandleList)
+              {
+                IWorkItem workItem = (IWorkItem)itemService.fetchItem(workItemHandle, IRepositoryItemService.COMPLETE);
+                
+                IWorkItem workItemWC = (IWorkItem)workItemServer.findWorkItemById(workItem.getId(), IWorkItem.FULL_PROFILE, monitor).getWorkingCopy();
+                IAttribute lateAttribute = workItemServer.findAttribute(workItemWC.getProjectArea(), Configuration.IS_LATE_ID, monitor);
+                IAttribute gatewayDateAttribute = workItemServer.findAttribute(workItemWC.getProjectArea(), Configuration.GATEWAY_DATE_ID, monitor);
+                
+                validator.workItemPassValidation(workItem, newIteration, workItemServer, monitor);
+                workItemWC.setValue(lateAttribute, validator.isLate);
+                Date utilDate = validator.gatewayDate;
+                if (utilDate != null)
+                {
+                  Timestamp timestamp = new Timestamp(utilDate.getTime());
+                  workItemWC.setValue(gatewayDateAttribute, timestamp);
+                }
+                else
+                {
+                  workItemWC.setValue(gatewayDateAttribute, null);
+                }
+                Set additionalParams = new HashSet();
+                additionalParams.add("LateTestValidatorPlugin");
+                workItemServer.saveWorkItem3(workItemWC, null, null, additionalParams);
+                if (((Boolean)workItemWC.getValue(lateAttribute)).booleanValue()) {
+                  iCountWorkItemsLateAfter++;
+                }
+              }
+              strReportMessage = 
+                strReportMessage + iCountWorkItemsVisited + " Test Tasks are planned for Gateway " + "'" + newIteration.getName() + "'.\n" + "   " + iCountWorkItemsLateBefore + " were late before\n   " + iCountWorkItemsLateAfter + " are late now\n";
+            }
+          }
+        }
+      }
+      if (!strReportMessage.equals(""))
+      {
+        IReportInfo info = collector.createInfo("Late Test Validation report", strReportMessage);
+        info.setSeverity(2);
+        collector.addInfo(info);
+        return;
+      }
+    }
+  }
+}

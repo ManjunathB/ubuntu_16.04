@@ -1,0 +1,490 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.jlr.rmdv.latetestvalidator.plugin" default="build.jars" basedir=".">
+
+	<property name="p2.build.repo" value="file:${buildDirectory}/buildRepo"/>
+	<property name="basews" value="${ws}"/>
+	<property name="baseos" value="${os}"/>
+	<property name="basearch" value="${arch}"/>
+	<property name="basenl" value="${nl}"/>
+	<property name="bundleId" value="com.jlr.rmdv.latetestvalidator.plugin"/>
+	<property name="bundleVersion" value="1.2.0.201606230847"/>
+	<property name="p2.publishonerror" value="false"/>
+
+	<!-- Compiler settings. -->
+	<property name="javacFailOnError" value="false"/>
+	<property name="javacDebugInfo" value="on"/>
+	<property name="javacVerbose" value="false"/>
+	<property name="logExtension" value=".log"/>
+	<property name="compilerArg" value=""/>
+	<property name="compilation.prereq.log" value="${buildDirectory}/prereqErrors.log"/>
+	<property name="javacSource" value="1.3"/>
+	<property name="javacTarget" value="1.2"/>
+	<condition property="dir_bootclasspath" value="${java.home}/../Classes">
+		<os family="mac"/>
+	</condition>
+	<property name="dir_bootclasspath" value="${java.home}/lib"/>
+	<path id="path_bootclasspath">
+		<fileset dir="${dir_bootclasspath}">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+	<property name="bootclasspath" refid="path_bootclasspath"/>
+	<property name="bundleJavacSource" value="${javacSource}"/>
+	<property name="bundleJavacTarget" value="${javacTarget}"/>
+	<property name="bundleBootClasspath" value="${bootclasspath}"/>
+
+	<target name="init" depends="properties">
+		<condition property="pluginTemp" value="${buildTempFolder}/plugins"		>
+			<isset property="buildTempFolder"/>
+		</condition>
+		<property name="pluginTemp" value="${basedir}"/>
+		<condition property="build.result.folder" value="${pluginTemp}/com.jlr.rmdv.latetestvalidator.plugin_1.2.0.201606230847"		>
+			<isset property="buildTempFolder"/>
+		</condition>
+		<property name="build.result.folder" value="${basedir}"/>
+		<property name="temp.folder" value="${basedir}/temp.folder"/>
+		<property name="plugin.destination" value="${basedir}"/>
+		<condition property="p2.publish.parts" value="true"		>
+			<istrue value="${p2.gathering}"/>
+		</condition>
+		<property name="compilation.problem.marker" value="${build.result.folder}/compilation.problem"/>
+		<condition property="compilation.problem.marker.exists" value="true"		>
+			<and>
+			<available file="${compilation.problem.marker}"/>
+			<isfalse value="${p2.publishonerror}"/>
+			</and>
+		</condition>
+	</target>
+
+	<target name="properties" if="eclipse.running">
+		<property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+
+	</target>
+
+	<target name="build.update.jar" depends="init" description="Build the plug-in: com.jlr.rmdv.latetestvalidator.plugin for an update site.">
+		<delete dir="${temp.folder}"/>
+		<mkdir dir="${temp.folder}"/>
+		<antcall target="build.jars"/>
+		<antcall target="gather.bin.parts">
+			<param name="destination.temp.folder" value="${temp.folder}/"/>
+		</antcall>
+		<jar destfile="${plugin.destination}/com.jlr.rmdv.latetestvalidator.plugin_1.2.0.201606230847.jar" basedir="${temp.folder}/com.jlr.rmdv.latetestvalidator.plugin_1.2.0.201606230847" filesetmanifest="merge"/>
+		<delete dir="${temp.folder}"/>
+	</target>
+
+	<target name="@dot" depends="init" unless="@dot" description="Create jar: com.jlr.rmdv.latetestvalidator.plugin @dot.">
+		<delete dir="${build.result.folder}/@dot"/>
+		<mkdir dir="${build.result.folder}/@dot"/>
+		<path id="@dot.classpath">
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.core.runtime_3.6.0.v20100505.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.osgi_3.6.50.R36x_v20120315-1500.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.ws390.orb_1.0.100.v20120901_0511.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.equinox.servletbridge.extensionbundle_1.2.0.v20100503.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.equinox.common_3.6.0.v20100503.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.core.jobs_3.5.2.R36x_v20110419.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.core.runtime.compatibility.registry_3.3.0.v20100520/runtime_registry_compatibility.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.core.runtime.compatibility.registry_3.3.0.v20100520"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.equinox.registry_3.5.0.v20100503.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.equinox.preferences_3.3.1.R36x_v20110302.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.core.contenttype_3.4.100.v20100505-1235.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.core.runtime.compatibility.auth_3.2.200.v20100517.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.equinox.app_1.3.1.R36x_v20100803.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.osgi.services_3.2.100.v20100503.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/javax.servlet_2.5.0.v200910301333.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.process.common_1.2.1300.v20130424_0201.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.emf.ecore_2.6.1.v20100914-1218.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.emf.common_2.6.0.v20100914-1218.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.core.resources_3.6.2.R36x_v20120712-1700.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.core.resources.win32.x86_3.5.100.v20100505-1345.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.ant.core_3.2.202.v20110829_r363.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.core.variables_3.2.400.v20100505.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.core.expressions_3.4.200.v20100505.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.core.filesystem_1.3.1.R36x_v20100727-0745.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.core.filesystem.aix.ppc64_1.1.0.R36x_v20130402-0505.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.core.filesystem.aix.ppc_1.1.0.v20100505-1235.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.core.filesystem.hpux.ia64_32_1.0.100.v20100505.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.core.filesystem.linux.ppc64_1.4.0.R36x_v20130402-0505.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.core.filesystem.linux.ppc_1.0.200.v20100505-1235.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.core.filesystem.linux.x86_1.4.0.v20100505-1235.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.core.filesystem.linux.x86_64_1.2.0.v20100505-1235.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.core.filesystem.macosx_1.3.0.v20100505.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.core.filesystem.solaris.sparc_1.2.0.v20100505-1235.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.core.filesystem.win32.x86_1.1.201.R36x_v20100727-0745.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.core.filesystem.win32.x86_64_1.1.201.R36x_v20100727-0745.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.common_1.3.1400.v20130424_0201.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/net.oauth_0.2.100.v20120901_0511.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.commons.codec_1.3.0.v20100518-1140.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.http_4.1.100.v20120901_0511/lib/httpcore-4.1.3.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.http_4.1.100.v20120901_0511/lib/httpcore-nio-4.1.3.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.http.client_4.1.2.20120424/lib/httpclient-4.1.2.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.http.client_4.1.2.20120424/lib/httpmime-4.1.2.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.commons.io_1.2.1100.v20120901_0511/lib/commons-io-1.2.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.commons.logging_1.0.4.v201005080501.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.commons.logging.log4j_1.0.1100.v20120901_0511.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.log4j_1.2.15.v201005080500"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.james.mime4j_0.6.0.v20120423/lib/apache-mime4j-0.6.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.commons.httpclient_3.1.0.v201005080502.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.emf.ecore.xmi_2.5.0.v20100521-1846.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.text_3.5.0.v20100601-1300.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.icu_4.2.1.v20100412.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.core.commands_3.6.0.I20100512-1500.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.foundation.common_1.2.200.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.service_1.2.1400.v20130511_2355/repository_service_utils.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.service_1.2.1400.v20130511_2355/repository_service.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.service_1.2.1400.v20130511_2355/sat/org.eclipse.soda.sat.core_1.1.0.201204101445.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.service_1.2.1400.v20130511_2355/sat/org.eclipse.soda.sat.equinox.console.cmdprov_1.1.0.201009271629.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.service_1.2.1400.v20130511_2355/juno/com.ibm.juno_5.0.0.22.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.service_1.2.1400.v20130511_2355/servermsg"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.service.jdbc41_1.1.1300.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.automation_3.0.200.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.distributed_2.2.300.v20130424_0201.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.distributed.nl1_2.2.2.v201305071654.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.distributed.nl2_2.2.2.v201305071650.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.config_1.0.200.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.config.nl1_1.0.1.v201305071654.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.config.nl2_1.0.2.v201305071650.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.provision_1.2.300.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.json_1.1.1100.v20120901_0511.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.commons.fileupload_1.2.1100.v20120901_0511/org.apache.commons.fileupload_1.2.1.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.equinox.ds_1.2.1.R36x_v20100803.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.equinox.util_1.0.200.v20100503.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.distributed.objectgrid_2.2.300.v20130426_2118.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.distributed.objectgrid.nl1_2.2.3.v201305071654.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.distributed.objectgrid.nl2_2.2.3.v201305071650.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.util.registry_3.0.1100.v20120901_0511.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.util.nls_3.0.1100.v20120901_0511.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.util_1.2.400.v20130506_2345.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.util.nl1_1.2.2.v201305071654.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.util.nl2_1.2.2.v201305071650.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.hp.hpl.jena.rdf_2.7.4.v20130320_1901/lib/slf4j-api-1.6.4.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.hp.hpl.jena.rdf_2.7.4.v20130320_1901/lib/slf4j-log4j12-1.6.4.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.hp.hpl.jena.rdf_2.7.4.v20130320_1901/lib/xercesImpl-2.10.0.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.hp.hpl.jena.rdf_2.7.4.v20130320_1901/lib/xml-apis-1.4.01.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.hp.hpl.jena.rdf_2.7.4.v20130320_1901/lib/jena-arq-2.9.4.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.hp.hpl.jena.rdf_2.7.4.v20130320_1901/lib/jena-core-2.7.4.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.hp.hpl.jena.rdf_2.7.4.v20130320_1901/lib/jena-iri-0.9.4.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app_1.2.200.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.nl1_1.2.1.v201211071552.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.nl2_1.2.0.v201205171340.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.http_1.3.1300.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.http.nl1_1.3.1000.v201205171343.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.http.nl2_1.3.1001.v201305071650.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.friendsconfig_1.3.300.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.http.client_1.1.300.v20121019_2347.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.http.client.nl1_1.1.2.v201205171343.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.http.client.nl2_1.1.2.v201205171340.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.cache_1.1.1100.v20120901_0511.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.http.cache_1.1.1100.v20120901_0511.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.xml_1.2.200.v20121019_2347.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.xml.nl1_1.1.2.v201205171343.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.xml.nl2_1.1.1.v201109280231.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.xalan_2.7.100.v20120901_0511/lib/serializer.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.xalan_2.7.100.v20120901_0511/lib/xalan.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.error_1.1.1100.v20120901_0511.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.oauth_1.2.200.v20121108_0053.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.oauth.nl1_1.2.1.v201305071654.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.oauth.nl2_1.2.0.v201205171340.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.sun.syndication_1.0.1100.v20120901_0511/lib/rome-1.0.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.sun.syndication_1.0.1100.v20120901_0511/lib/jdom-1.0.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.websphere.objectgrid_7.1.600.v20121019_2347/lib/objectgrid.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.websphere.objectgrid_7.1.600.v20121019_2347"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.query_1.2.300.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.query.nl1_1.2.0.v201205171343.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.query.nl2_1.2.0.v201205171340.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/javax.xml.stream_1.0.0.20090824/lib/stax-api.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/javax.xml.stream_1.0.0.20090824/lib/xlxpScanner.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/javax.xml.stream_1.0.0.20090824/lib/xlxpScannerUtils.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/javax.xml.stream_1.0.0.20090824/lib/xlxpWASParsers.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.resource_1.2.100.v20120901_0511.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.common.json_1.1.1300.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.service.productregistry_3.0.1300.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/javax.mail_1.0.1100.v20120901_0511/mail.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/javax.mail_1.0.1100.v20120901_0511/activation.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.common.transport_1.1.1200.v20130129_0138.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.emf.mapping.ecore2xml_2.5.0.v20100521-1847.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.common.serialize_1.1.400.v20130506_2345.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.jndi_1.1.200.v20120901_0511.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.naming_5.5.1100.v20120901_0511/lib/naming.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.common.remoteaccess_1.1.1400.v20130404_2346.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.common.remoteaccess.auth_1.2.1300.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.http_1.1.1100.v20120901_0511.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.http.client.impl_1.1.1200.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.http.client.impl.nl1_1.1.1.v201109280231.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.http.client.impl.nl2_1.1.1.v201109280231.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.discovery_1.2.1200.v20121019_2347.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.servlet_1.2.300.v20130329_2111.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.servlet.nl1_1.2.2.v201305071654.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.servlet.nl2_1.2.1.v201305071650.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.workitem.common_3.1.700.v20130508_0252.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.fulltext.common_1.1.400.v20130409_2348.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.lucene2_2.4.400.v20130320_1901/lucene-core-3.6.1.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.lucene2_2.4.400.v20130320_1901/lucene-analyzers-3.6.1.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.lucene2_2.4.400.v20130320_1901/lucene-smartcn-3.6.1.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.lucene2_2.4.400.v20130320_1901/lucene-kuromoji-3.6.1.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.calm.foundation.common_3.1.300.v20130509_0147.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.workitem.api.common_3.1.300.v20130429_0038.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.dev.jdojo.runtime.common_3.0.500.v20130415_0257.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.rtc.common_3.1.500.v20130501_0315.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.workitem.service_3.1.500.v20130501_0315.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.process.service_1.2.1400.v20130427_0013.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.foundation.service_1.1.1200.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/net.jazz.ajax.service_2.1.500.v20130508_0133.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.sistdase.json_1.1.1100.v20120901_0511.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.auth_1.0.200.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.auth.nl1_1.0.2.v201305071654.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.app.auth.nl2_1.0.1.v201211071548.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.server.httpcore.bridge_1.1.1100.v20120901_0511.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/net.jazz.ajax_2.2.400.v20130410_2359.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.dojotoolkit.shrinksafe_1.1.1100.v20120901_0511.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.rational.rrdg.lib_1.2.0.v20130515_2221.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.mozilla.javascript_1.7.2.v201005080400.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.storage_1.1.500.v20130513_2116.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.indexing_1.1.700.v20130513_2116.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.common.internal_1.1.500.v20130402_2341.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.common.model_1.2.100.v20120901_0511.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.sdk.common_1.0.0.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repotools.command_1.1.400.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repotools.command.tests_1.1.300.v20130129_0138.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.junit_4.8.1.v4_8_1_v20100427-1100/junit.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.hamcrest.core_1.1.0.v20090501071000.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repotools.commands.local_1.1.1400.v20130508_2356.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.service.jts.discovery_3.0.1400.v20130424_0201.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.service.jts.oauth_3.0.1400.v20130415_0122.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.service.compatibility.resolution_3.0.1200.v20130129_0138.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.service.compatibility.util_3.0.500.v20130417_2344.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.service.compatibility.license.tests_1.0.0.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.service.compatibility.util.tests_3.0.1.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.common.tests_1.1.1.v20130328_2343.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.tests.common_1.1.1.v20130320_1901/com.ibm.team.tests.log.client.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.tests.common_1.1.1.v20130320_1901/lib/mockito-all-1.9.5.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.tests.common.fragment_1.1.1.v20120526_0607"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.tests.common.fragment_1.1.1.v20120526_0607/com.ibm.team.tests.log.client.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.tests.common.fragment_1.1.1.v20120526_0607/lib/mockito-all-1.9.5.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.service.tests_1.1.1.v20130430_2013/team_repo_dbtests.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.service.jts.discovery.tests_3.0.1.v20130402_2341.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.tests.smtp_1.0.0.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.mortbay.jetty.util_6.1.23.v201004211559.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.mortbay.jetty.server_6.1.23.v201004211559.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.jasper_5.5.17.v201004212143.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/javax.servlet.jsp_2.0.0.v200806031607.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.commons.el_1.0.0.v201004212143.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant-antlr.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant-apache-bcel.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant-apache-bsf.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant-apache-log4j.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant-apache-oro.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant-apache-regexp.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant-apache-resolver.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant-commons-logging.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant-commons-net.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant-jai.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant-javamail.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant-jdepend.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant-jmf.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant-jsch.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant-junit.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant-launcher.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant-netrexx.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant-nodeps.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant-starteam.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant-stylebook.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant-swing.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant-trax.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.ant_1.7.1.v20100518-1145/lib/ant-weblogic.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.tests.service_1.1.1.v20130424_0201/logservice.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.test.performance_3.6.0.v20100122.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.test.performance.win32_3.1.100.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.common.serialize.tests_1.1.1.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.tests.evolution.server_1.1.1.v20120731_0405.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.junit4_4.8.1.v20100525"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.hp.hpl.jena_2.7.4.v20130320_1901/lib/jena-tdb-0.9.4.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.indexing.common_1.0.0.v20130329_2111.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.common.http.internal_1.0.0.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.jfs.sdk.storage_1.0.0.v20130513_2116.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.service.jts.auth_3.0.1400.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.servlet_1.1.1400.v20130415_2344/com.ibm.team.repository.servlet.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.eclipse.equinox.http.registry_1.1.1.R36x_v20101103.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.process.service.shared_1.1.1200.v20121019_2347.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.repository.service.rename_1.0.300.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.fulltext.service_1.1.400.v20130402_2341.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.process.service.migration_1.2.1400.v20130320_1901.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.calm.foundation.server_3.1.200.v20121026_0950.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/com.ibm.team.rtc.common.service_3.0.400.v20130429_0038.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.velocity_1.5.100.v20120904_2342/lib/commons-collections-3.2.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.velocity_1.5.100.v20120904_2342/lib/commons-lang-2.3.jar"/>
+			<pathelement path="../../../../installs/rtc-sdk/plugins/org.apache.velocity_1.5.100.v20120904_2342/lib/velocity-1.5.jar"/>
+		</path>
+		<!-- compile the source code -->
+		<javac destdir="${build.result.folder}/@dot" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" bootclasspath="${bundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}"		>
+			<compilerarg line="${compilerArg}" compiler="${build.compiler}"/>
+			<classpath refid="@dot.classpath" />
+			<src path="src/"			/>
+			<compilerarg value="@${basedir}/javaCompiler...args" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"			/>
+			<compilerarg line="-log &apos;${build.result.folder}/@dot${logExtension}&apos;" compiler="org.eclipse.jdt.core.JDTCompilerAdapter"			/>
+		</javac>
+		<antcall target="checkCompilationResults"/>
+		<!-- Copy necessary resources -->
+		<copy todir="${build.result.folder}/@dot" failonerror="true" overwrite="false">
+			<fileset dir="src/">
+				<exclude name="**/*.java"/>
+				<exclude name="**/package.htm*"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="src.zip" depends="init" unless="src.zip">
+		<mkdir dir="${build.result.folder}"/>
+		<antcall target="zip.src.zip"/>
+	</target>
+	<target name="zip.src.zip">
+		<zip destfile="${build.result.folder}/src.zip" filesonly="false" whenempty="skip" update="false">
+			<fileset dir="src/">
+				<include name="**/*.java"/>
+			</fileset>
+		</zip>
+	</target>
+	<target name="copy.src.zip">
+		<copy todir="${source.destination.folder}/" failonerror="true" overwrite="true">
+			<fileset dir="src/">
+				<include name="**/*.java"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="build.jars" depends="init" description="Compile classes and build nested jars for the plug-in: com.jlr.rmdv.latetestvalidator.plugin.">
+		<delete file="${compilation.problem.marker}" quiet="true"/>
+		<available property="@dot" file="${build.result.folder}/@dot"/>
+		<antcall target="@dot"/>
+	</target>
+
+	<target name="checkCompilationResults" if="compilation.error.occured">
+		<echo file="${compilation.problem.marker}" message="com.jlr.rmdv.latetestvalidator.plugin_1.2.0.201606230847${line.separator}compilation.error.occured=${compilation.error.occured}"/>
+		<eclipse.logCompileError bundle="com.jlr.rmdv.latetestvalidator.plugin_1.2.0.201606230847" log="${compilation.prereq.log}">
+		</eclipse.logCompileError>
+	</target>
+
+	<target name="build.sources" depends="init">
+		<available property="src.zip" file="${build.result.folder}/src.zip"/>
+		<antcall target="src.zip"/>
+	</target>
+
+	<target name="publish.bin.parts" depends="init" if="p2.publish.parts" unless="compilation.problem.marker.exists">
+		<mkdir dir="${build.result.folder}/com.jlr.rmdv.latetestvalidator.plugin_1.2.0.201606230847"/>
+		<copy todir="${build.result.folder}" failonerror="true" overwrite="true">
+			<fileset dir="${basedir}">
+				<include name="META-INF/MANIFEST.MF"/>
+				<include name="plugin.xml"/>
+				<include name="fragment.xml"/>
+			</fileset>
+		</copy>
+		<eclipse.versionReplacer path="${build.result.folder}" version="1.2.0.201606230847"/>
+		<antcall target="apitools.generation">
+			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
+			<param name="binary.folders" value="${build.result.folder}/@dot"/>
+			<param name="target.folder" value="${build.result.folder}"/>
+			<param name="projectLocation" value="${basedir}"/>
+		</antcall>
+		<eclipse.gatherBundle 
+		   metadataRepository="${p2.build.repo}"
+		   artifactRepository="${p2.build.repo}"
+		   buildResultFolder="${build.result.folder}"
+		   unpack="false"
+		   baseDirectory="${basedir}"
+		/>
+	</target>
+
+	<target name="gather.bin.parts" depends="init" if="destination.temp.folder">
+		<mkdir dir="${destination.temp.folder}/com.jlr.rmdv.latetestvalidator.plugin_1.2.0.201606230847"/>
+		<copy todir="${destination.temp.folder}/com.jlr.rmdv.latetestvalidator.plugin_1.2.0.201606230847" failonerror="true" overwrite="false">
+			<fileset dir="${build.result.folder}/@dot">
+				<include name="**"/>
+			</fileset>
+		</copy>
+		<copy todir="${destination.temp.folder}/com.jlr.rmdv.latetestvalidator.plugin_1.2.0.201606230847" failonerror="true" overwrite="true">
+			<fileset dir="${basedir}">
+				<include name="plugin.xml"/>
+				<include name="META-INF/"/>
+				<include name="*.xml"/>
+			</fileset>
+		</copy>
+		<eclipse.versionReplacer path="${destination.temp.folder}/com.jlr.rmdv.latetestvalidator.plugin_1.2.0.201606230847" version="1.2.0.201606230847"/>
+		<antcall target="apitools.generation">
+			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
+			<param name="binary.folders" value="${build.result.folder}/@dot"/>
+			<param name="target.folder" value="${destination.temp.folder}/com.jlr.rmdv.latetestvalidator.plugin_1.2.0.201606230847"/>
+			<param name="projectLocation" value="${basedir}"/>
+		</antcall>
+	</target>
+
+	<target name="build.zips" depends="init">
+	</target>
+
+	<target name="gather.sources" depends="init" if="destination.temp.folder">
+		<mkdir dir="${destination.temp.folder}/com.jlr.rmdv.latetestvalidator.plugin_1.2.0.201606230847"/>
+		<copy file="${build.result.folder}/src.zip" todir="${destination.temp.folder}/com.jlr.rmdv.latetestvalidator.plugin_1.2.0.201606230847" failonerror="false" overwrite="false"/>
+		<antcall target="copy.src.includes">
+			<param name="source.destination.folder" value="${destination.temp.folder}/com.jlr.rmdv.latetestvalidator.plugin_1.2.0.201606230847"/>
+		</antcall>
+	</target>
+
+	<target name="gather.individual.sources" depends="init">
+		<antcall target="copy.src.zip">
+			<param name="source.destination.folder" value="${destination.temp.folder}"/>
+		</antcall>
+		<antcall target="copy.src.includes">
+			<param name="source.destination.folder" value="${destination.temp.folder}"/>
+		</antcall>
+	</target>
+
+	<target name="copy.src.includes" depends="init">
+	</target>
+
+	<target name="gather.logs" depends="init" if="destination.temp.folder">
+		<mkdir dir="${destination.temp.folder}/com.jlr.rmdv.latetestvalidator.plugin_1.2.0.201606230847"/>
+		<copy todir="${destination.temp.folder}/com.jlr.rmdv.latetestvalidator.plugin_1.2.0.201606230847" failonerror="false" overwrite="false">
+			<fileset dir="${build.result.folder}">
+				<include name="@dot${logExtension}"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="clean" depends="init" description="Clean the plug-in: com.jlr.rmdv.latetestvalidator.plugin of all the zips, jars and logs created.">
+		<delete dir="${build.result.folder}/@dot"/>
+		<delete file="${build.result.folder}/src.zip"/>
+		<delete file="${plugin.destination}/com.jlr.rmdv.latetestvalidator.plugin_1.2.0.201606230847.jar"/>
+		<delete file="${plugin.destination}/com.jlr.rmdv.latetestvalidator.plugin_1.2.0.201606230847.zip"/>
+		<delete dir="${temp.folder}"/>
+		<delete file="${compilation.problem.marker}" quiet="true"/>
+	</target>
+
+	<target name="refresh" depends="init" if="eclipse.running" description="Refresh this folder.">
+		<eclipse.convertPath fileSystemPath="C:/RTC403Dev/workspaces/Dev1/WS/com.jlr.rmdv.latetestvalidator.plugin" property="resourcePath"/>
+		<eclipse.refreshLocal resource="${resourcePath}" depth="infinite"/>
+	</target>
+
+	<target name="zip.plugin" depends="init" description="Create a zip containing all the elements for the plug-in: com.jlr.rmdv.latetestvalidator.plugin.">
+		<delete dir="${temp.folder}"/>
+		<mkdir dir="${temp.folder}"/>
+		<antcall target="build.jars"/>
+		<antcall target="build.sources"/>
+		<antcall target="gather.bin.parts">
+			<param name="destination.temp.folder" value="${temp.folder}/"/>
+		</antcall>
+		<antcall target="gather.sources">
+			<param name="destination.temp.folder" value="${temp.folder}/"/>
+		</antcall>
+		<delete>
+			<fileset dir="${temp.folder}">
+				<include name="**/*.bin${logExtension}"/>
+			</fileset>
+		</delete>
+		<zip destfile="${plugin.destination}/com.jlr.rmdv.latetestvalidator.plugin_1.2.0.201606230847.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
+		<delete dir="${temp.folder}"/>
+	</target>
+
+	<target name="apitools.generation" if="generateAPIDescription">
+		<apitooling.apigeneration  projectName="${projectName}" project="${projectLocation}" binary="${binary.folders}" target="${target.folder}" extramanifests="${extraManifests}"		/>
+	</target>
+
+</project>

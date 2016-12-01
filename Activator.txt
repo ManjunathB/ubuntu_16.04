@@ -1,0 +1,32 @@
+package com.jlr.rmdv.latetestvalidator;
+
+import java.io.PrintStream;
+import org.eclipse.core.runtime.Plugin;
+import org.osgi.framework.BundleContext;
+
+public class Activator
+  extends Plugin
+{
+  private static Activator plugin;
+  
+  public void start(BundleContext context)
+    throws Exception
+  {
+    System.out.println("Late Test Validator plugin loaded.");
+    super.start(context);
+    plugin = this;
+  }
+  
+  public void stop(BundleContext context)
+    throws Exception
+  {
+    System.out.println("Late Test Validator plugin unloaded.");
+    plugin = null;
+    super.stop(context);
+  }
+  
+  public static Activator getDefault()
+  {
+    return plugin;
+  }
+}

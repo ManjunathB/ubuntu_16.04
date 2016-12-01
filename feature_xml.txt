@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="com.ibm.team.process.service.operationParticipants">
+      <operationParticipant
+            class="com.jlr.rmdv.latetestvalidator.WorkItemSaveOperationParticipant"
+            id="com.jlr.rmdv.latetestvalidator.WorkItemSaveOperationParticipant"
+            name="Late Test Validator saving WI"
+            operationId="com.ibm.team.workitem.operation.workItemSave">
+         <description>
+            Checks if the Sched date is later than the planned date of the selected iteration.
+         </description>
+         <extensionService
+               componentId="com.jlr.rmdv.latetestvalidator.WorkItemSaveOperationParticipantExtensionService"
+               implementationClass="com.jlr.rmdv.latetestvalidator.WorkItemSaveOperationParticipant">
+            <prerequisites>
+            		<requiredService interface="com.ibm.team.repository.service.IRepositoryItemService"/>
+            		<requiredService interface="com.ibm.team.workitem.service.IWorkItemServer"/>
+            </prerequisites>
+         </extensionService>
+      </operationParticipant>
+      <operationParticipant
+            class="com.jlr.rmdv.latetestvalidator.IterationSaveOperationParticipant"
+            id="com.jlr.rmdv.latetestvalidator.IterationSaveOperationParticipant"
+            name="Late Test Validator saving PrjArea"
+            operationId="com.ibm.team.process.server.saveProjectArea">
+         <description>
+            Checks if the Sched date of the Late Tests assigned to this iteration is later than the planned date of the iteration.
+         </description>
+         <extensionService
+               componentId="com.jlr.rmdv.latetestvalidator.IterationSaveOperationParticipantExtensionService"
+               implementationClass="com.jlr.rmdv.latetestvalidator.IterationSaveOperationParticipant">
+            <prerequisites>
+            	<requiredService interface="com.ibm.team.repository.service.IRepositoryItemService"/>
+            	<requiredService interface="com.ibm.team.repository.common.service.IQueryService"/>
+            	<requiredService interface="com.ibm.team.workitem.service.IWorkItemServer"/>
+            </prerequisites>
+         </extensionService>
+      </operationParticipant>
+   </extension>
+
+
+</plugin>

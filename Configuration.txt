@@ -1,0 +1,11 @@
+package com.jlr.rmdv.latetestvalidator;
+
+public class Configuration
+{
+  static String SCHED_END_DATE_ID = "SchedFinish";
+  static String GATEWAY_DATE_ID = "gatewaydate";
+  static String IS_LATE_ID = "islate";
+  static String CONFORMANCE_PLAN_ID = "conformance";
+  static String WORKITEM_TYPE_ID = "test_task";
+  static final String PLUGIN_NAME = "LateTestValidatorPlugin";
+}

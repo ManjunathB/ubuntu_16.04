@@ -1,0 +1,179 @@
+package com.jlr.rmdv.latetestvalidator;
+
+import com.ibm.team.process.common.IIteration;
+import com.ibm.team.process.common.IIterationHandle;
+import com.ibm.team.process.common.IProcessConfigurationElement;
+import com.ibm.team.process.common.advice.AdvisableOperation;
+import com.ibm.team.process.common.advice.IReportInfo;
+import com.ibm.team.process.common.advice.runtime.IOperationParticipant;
+import com.ibm.team.process.common.advice.runtime.IParticipantInfoCollector;
+import com.ibm.team.repository.common.TeamRepositoryException;
+import com.ibm.team.repository.service.AbstractService;
+import com.ibm.team.repository.service.IRepositoryItemService;
+import com.ibm.team.workitem.common.ISaveParameter;
+import com.ibm.team.workitem.common.model.IAttribute;
+import com.ibm.team.workitem.common.model.IWorkItem;
+import com.ibm.team.workitem.service.IWorkItemServer;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+import org.eclipse.core.runtime.IProgressMonitor;
+
+public class WorkItemSaveOperationParticipant
+  extends AbstractService
+  implements IOperationParticipant
+{
+  private static String errMessage1 = "There was a problem saving the Test Task";
+  
+  public void run(AdvisableOperation operation, IProcessConfigurationElement participantConfig, IParticipantInfoCollector collector, IProgressMonitor monitor)
+    throws TeamRepositoryException
+  {
+    Object data = operation.getOperationData();
+    if ((data instanceof ISaveParameter))
+    {
+      ISaveParameter saveParameter = (ISaveParameter)data;
+      if (saveParameter.getAdditionalSaveParameters().contains("LateTestValidatorPlugin")) {
+        return;
+      }
+      Set<String> additionalParameters = saveParameter.getAdditionalSaveParameters();
+      for (String param : additionalParameters) {
+        if (param.contains("Plugin")) {
+          return;
+        }
+      }
+      Set additionalParams = new HashSet();
+      additionalParams.add("LateTestValidatorPlugin");
+      if ((saveParameter.getNewState() instanceof IWorkItem))
+      {
+        IWorkItem newWorkItem = (IWorkItem)saveParameter.getNewState();
+        IWorkItem oldWorkItem = (IWorkItem)saveParameter.getOldState();
+        
+        IWorkItemServer workItemServer = (IWorkItemServer)getService(IWorkItemServer.class);
+        IRepositoryItemService itemService = (IRepositoryItemService)getService(IRepositoryItemService.class);
+        
+        String strWorkItemType = newWorkItem.getWorkItemType();
+        if (strWorkItemType.equals(Configuration.WORKITEM_TYPE_ID))
+        {
+          Validator validator = new Validator();
+          if (!validator.passPreChecks(newWorkItem, workItemServer, monitor).booleanValue())
+          {
+            IReportInfo info = collector.createInfo(errMessage1, validator.collectorText);
+            info.setSeverity(4);
+            collector.addInfo(info);
+            return;
+          }
+          IWorkItem workItemWC = (IWorkItem)workItemServer.findWorkItemById(newWorkItem.getId(), IWorkItem.FULL_PROFILE, monitor).getWorkingCopy();
+          IAttribute lateAttribute = workItemServer.findAttribute(workItemWC.getProjectArea(), Configuration.IS_LATE_ID, monitor);
+          IAttribute gatewayDateAttribute = workItemServer.findAttribute(workItemWC.getProjectArea(), Configuration.GATEWAY_DATE_ID, monitor);
+          IAttribute schedEndDateAttribute = workItemServer.findAttribute(newWorkItem.getProjectArea(), Configuration.SCHED_END_DATE_ID, monitor);
+          IAttribute conformanceIDAttribute = workItemServer.findAttribute(newWorkItem.getProjectArea(), Configuration.CONFORMANCE_PLAN_ID, monitor);
+          
+          IIterationHandle newIterationHandler = newWorkItem.getTarget();
+          if (newIterationHandler == null)
+          {
+            if (workItemWC.getValue(gatewayDateAttribute) != null)
+            {
+              workItemWC.setValue(lateAttribute, Boolean.valueOf(false));
+              workItemWC.setValue(gatewayDateAttribute, null);
+              workItemServer.saveWorkItem3(workItemWC, null, null, additionalParams);
+            }
+            return;
+          }
+          IIteration newIteration = (IIteration)itemService.fetchItem(newIterationHandler, IRepositoryItemService.COMPLETE);
+          if (newIteration.getEndDate() == null)
+          {
+            if (workItemWC.getValue(gatewayDateAttribute) != null)
+            {
+              workItemWC.setValue(lateAttribute, Boolean.valueOf(false));
+              workItemWC.setValue(gatewayDateAttribute, null);
+              workItemServer.saveWorkItem3(workItemWC, null, null, additionalParams);
+            }
+            return;
+          }
+          Date newSchedEndDate = (Date)newWorkItem.getValue(schedEndDateAttribute);
+          if (newSchedEndDate == null)
+          {
+            Date endDate = newIteration.getEndDate();
+            Date endDateBefore = null;
+            if (oldWorkItem != null) {
+              endDateBefore = (Date)oldWorkItem.getValue(gatewayDateAttribute);
+            }
+            if ((endDateBefore == null) || (!endDateBefore.equals(endDate)))
+            {
+              workItemWC.setValue(lateAttribute, Boolean.valueOf(false));
+              workItemWC.setValue(gatewayDateAttribute, endDate);
+              workItemServer.saveWorkItem3(workItemWC, null, null, additionalParams);
+            }
+            return;
+          }
+          String newConformanceID = (String)newWorkItem.getValue(conformanceIDAttribute);
+          String newIterationID = newIteration.getId();
+          Date oldSchedEndDate = null;
+          String oldConformanceID = "";
+          String oldIterationID = "";
+          if (oldWorkItem != null)
+          {
+            oldSchedEndDate = (Date)oldWorkItem.getValue(schedEndDateAttribute);
+            oldConformanceID = (String)oldWorkItem.getValue(conformanceIDAttribute);
+            IIterationHandle oldIterationHandler = oldWorkItem.getTarget();
+            if (oldIterationHandler != null)
+            {
+              IIteration oldIteration = (IIteration)itemService.fetchItem(oldIterationHandler, IRepositoryItemService.COMPLETE);
+              oldIterationID = oldIteration.getId();
+            }
+          }
+          if ((oldWorkItem == null) || 
+            ((oldSchedEndDate == null) && (newSchedEndDate != null)) || 
+            (!oldSchedEndDate.equals(newSchedEndDate)) || 
+            (!oldConformanceID.equals(newConformanceID)) || 
+            (!oldIterationID.equals(newIterationID)))
+          {
+            if (!validator.workItemPassValidation(newWorkItem, newIteration, workItemServer, monitor).booleanValue())
+            {
+              IReportInfo info = collector.createInfo(errMessage1, validator.collectorText);
+              info.setSeverity(4);
+              collector.addInfo(info);
+              return;
+            }
+            Boolean requiresSaving = Boolean.valueOf(false);
+            Boolean isLate = (Boolean)workItemWC.getValue(lateAttribute);
+            if (isLate != validator.isLate)
+            {
+              workItemWC.setValue(lateAttribute, validator.isLate);
+              requiresSaving = Boolean.valueOf(true);
+            }
+            Date utilDate = validator.gatewayDate;
+            Date dateGatewayBefore = (Date)workItemWC.getValue(gatewayDateAttribute);
+            if (utilDate != null)
+            {
+              Timestamp timestamp = new Timestamp(utilDate.getTime());
+              if (dateGatewayBefore != null)
+              {
+                Timestamp timestampBefore = new Timestamp(dateGatewayBefore.getTime());
+                if (!timestamp.equals(timestampBefore))
+                {
+                  workItemWC.setValue(gatewayDateAttribute, timestamp);
+                  requiresSaving = Boolean.valueOf(true);
+                }
+              }
+              else
+              {
+                workItemWC.setValue(gatewayDateAttribute, timestamp);
+                requiresSaving = Boolean.valueOf(true);
+              }
+            }
+            else if (dateGatewayBefore != null)
+            {
+              workItemWC.setValue(gatewayDateAttribute, null);
+              requiresSaving = Boolean.valueOf(true);
+            }
+            if (requiresSaving.booleanValue()) {
+              workItemServer.saveWorkItem3(workItemWC, null, null, additionalParams);
+            }
+          }
+        }
+      }
+    }
+  }
+}

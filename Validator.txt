@@ -1,0 +1,89 @@
+package com.jlr.rmdv.latetestvalidator;
+
+import com.ibm.team.process.common.IIteration;
+import com.ibm.team.repository.common.TeamRepositoryException;
+import com.ibm.team.workitem.common.model.IAttribute;
+import com.ibm.team.workitem.common.model.IWorkItem;
+import com.ibm.team.workitem.service.IWorkItemServer;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import org.eclipse.core.runtime.IProgressMonitor;
+
+public class Validator
+{
+  public String collectorText = "";
+  public Boolean isLate = Boolean.valueOf(false);
+  public Date gatewayDate;
+  
+  public Boolean passPreChecks(IWorkItem wi, IWorkItemServer workItemServer, IProgressMonitor monitor)
+    throws TeamRepositoryException
+  {
+    IAttribute lateAttribute = workItemServer.findAttribute(wi.getProjectArea(), Configuration.IS_LATE_ID, monitor);
+    if ((lateAttribute == null) || (!wi.hasAttribute(lateAttribute)))
+    {
+      this.collectorText = ("The Test Task does not have the '" + Configuration.IS_LATE_ID + "' attribute definition. Please correct the problem and try again or check with the Administrator");
+      return Boolean.valueOf(false);
+    }
+    IAttribute gatewayDateAttribute = workItemServer.findAttribute(wi.getProjectArea(), Configuration.GATEWAY_DATE_ID, monitor);
+    if ((gatewayDateAttribute == null) || (!wi.hasAttribute(gatewayDateAttribute)))
+    {
+      this.collectorText = ("The Test Task does not have the '" + Configuration.GATEWAY_DATE_ID + "' attribute definition.");
+      return Boolean.valueOf(false);
+    }
+    return Boolean.valueOf(true);
+  }
+  
+  public Boolean workItemPassValidation(IWorkItem wi, IIteration iteration, IWorkItemServer workItemServer, IProgressMonitor monitor)
+    throws TeamRepositoryException
+  {
+    this.collectorText = "";
+    
+    IAttribute scheduledEndDateAttribute = workItemServer.findAttribute(wi.getProjectArea(), Configuration.SCHED_END_DATE_ID, monitor);
+    Date wiSchedDate = (Date)wi.getValue(scheduledEndDateAttribute);
+    Date iterationEndDate = iteration.getEndDate();
+    if (iterationEndDate == null)
+    {
+      this.isLate = Boolean.valueOf(false);
+      this.gatewayDate = null;
+      return Boolean.valueOf(true);
+    }
+    int intCompareDatesResult = 0;
+    
+    iterationEndDate = removeTime(iterationEndDate);
+    if (wiSchedDate != null)
+    {
+      wiSchedDate = removeTime(wiSchedDate);
+      intCompareDatesResult = wiSchedDate.compareTo(iterationEndDate);
+    }
+    if (intCompareDatesResult > 0)
+    {
+      IAttribute conformancePlanAttribute = workItemServer.findAttribute(wi.getProjectArea(), Configuration.CONFORMANCE_PLAN_ID, monitor);
+      String strConformancePlan = (String)wi.getValue(conformancePlanAttribute);
+      if (strConformancePlan.equals(""))
+      {
+        this.collectorText = ("The Sched Finish is later than the " + iteration.getName() + " Gateway (" + new SimpleDateFormat("dd MMM yy").format(iterationEndDate) + "). Either reschedule the test or enter a valid MiNT ID and save again");
+        return Boolean.valueOf(false);
+      }
+      this.isLate = Boolean.valueOf(true);
+    }
+    else
+    {
+      this.isLate = Boolean.valueOf(false);
+    }
+    this.gatewayDate = iterationEndDate;
+    
+    return Boolean.valueOf(true);
+  }
+  
+  public Date removeTime(Date date)
+  {
+    Calendar cal = Calendar.getInstance();
+    cal.setTime(date);
+    cal.set(11, 0);
+    cal.set(12, 0);
+    cal.set(13, 0);
+    cal.set(14, 0);
+    return cal.getTime();
+  }
+}
