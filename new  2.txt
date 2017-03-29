@@ -1,0 +1,86 @@
+var unavailableDates = ["16-06-2016", "17-05-2016", "24-08-2010", "27-10-2010"]
+
+       function unavailable(date) {
+       dmy = (date.getMonth() + 1) "-" + (date.getDate() "-" + date.getFullYear();
+       if (jQuery.inArray(dmy, unavailableDates) == -1) {
+        return [true, ""];
+       } else {
+         return [false, "", "Unavailable"];
+        }
+                 }
+                 
+                 function compareDate(str1, sep){
+                 var mon1  = parseInt(str1.split(sep)[1], 10);
+                 var dt1   = parseInt(str1.split(sep)[0], 10);
+                 var yr1   = parseInt(str1.split(sep)[2], 10);
+                 var date1 = new Date(yr1, mon1-1, dt1);
+                 return date1;
+                 }
+                 function setMaxDate()
+                {
+               var date = $("#from").val();
+              for(var i=0; i<unavailableDates.length; i++)
+              {
+            if(compareDate(date, "/")<compareDate(unavailableDates[i], "-")) 
+           return compareDate(unavailableDates[i], "-");
+              }
+                return null;
+             }
+			 
+
+			 
+			 
+			 
+			 
+			 
+			 
+			function DisableSunday(date) {
+ 
+          var day = date.getDay();
+                  
+                   if (day == 0) {
+ 
+                return [false] ; 
+ 
+                } else { 
+ 
+                return [true] ;
+                       }
+  
+                    }
+					
+					beforeShowday: DisableSunday
+
+					
+					
+					
+					check process tomcat with pidfile "/var/run/tomcat/tomcat.pid"
+  start program = "/usr/local/tomcat/bin/startup.sh" as uid tomcat gid tomcat
+  stop program = "/usr/local/tomcat/bin/shutdown.sh" as uid tomcat gid tomcat
+  if failed port 8080 then alert
+  if failed port 8080 for 5 cycles then restart
+  
+  
+  
+  <Context ...>
+  ...
+  <Resource name="mail/Session" auth="Container"
+            type="javax.mail.Session"
+            mail.smtp.host="localhost"/>
+  ...
+</Context>
+
+<Resource name="mail/Session" auth="Container" type="javax.mail.Session"
+    mail.transport.protocol="smtp"
+    mail.smtp.auth="true"
+    mail.smtp.host="smtp.outlook.com"
+    mail.smtp.port="465"
+    mail.smtp.user="<username>"
+    password="<password>"
+    mail.smtp.from="<sender email>"
+    mail.smtp.quitwait="false"
+    mail.smtp.starttls.enable="true"
+    mail.smtp.socketFactory.class="javax.net.ssl.SSLSocketFactory"
+    mail.debug="true"/>
+	
+	
