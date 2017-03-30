@@ -1,0 +1,29 @@
+Date
+ date1, date2; (set
+ up the dates as
+ you see fit) if
+ (date1.before(date2)){
+ .... } if
+ (date1.after(date2)){
+ .... } if
+ (date1.equals(date2)){ .... }
+
+
+
+
+
+
+
+
+String
+ date1 = "30-10-2003";
+String
+ date2 = "30-12-2003";
+SimpleDateFormat
+ formatter = new SimpleDateFormat ("dd-MM-yyyy");
+Date
+ d1 = formatter.parse(date1); Date
+ d2 = formatter.parse(date2); long
+ millisDiff = d2.getTime() - d2.getTime(); double
+ daysDiff = (double)millisDiff/(1000*60*60*24);
+
